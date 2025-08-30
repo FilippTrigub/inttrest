@@ -1,0 +1,32 @@
+
+# Node modules
+node_modules
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+virtualenv/
+venv/
+env/
+
+# React build artifacts
+build/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS generated files
+.DS_Store
+thumbs.db
+prompt.xml
+
