@@ -1,43 +1,10 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import React, { useState } from 'react';
 
 const ChatComponent = () => {
-  const { messages, sendMessage, status, stop, addToolResult } = useChat({
-    onToolCall: async ({ toolCall }) => {
-      // Note: do not await addToolResult to avoid deadlocks
-      try {
-        // Ignore dynamic tools for type safety
-        if ((toolCall as any).dynamic) return;
-
-        const baseUrl = new URL(window.location.origin + '/api/mcp-server');
-        const transport = new StreamableHTTPClientTransport(baseUrl);
-        const client = new Client({ name: 'web-client', version: '1.0.0' });
-        await client.connect(transport);
-
-        const result = await client.callTool({ 
-          name: toolCall.toolName, 
-          arguments: toolCall.args 
-        });
-        
-        addToolResult({
-          tool: toolCall.toolName,
-          toolCallId: (toolCall as any).toolCallId,
-          output: result.content,
-        });
-      } catch (err) {
-        console.error('MCP tool call failed:', err);
-        addToolResult({
-          tool: toolCall.toolName,
-          toolCallId: (toolCall as any).toolCallId,
-          output: [{ type: 'text', text: 'Tool error: unable to execute MCP call.' }],
-        });
-      }
-    },
-  });
+  const { messages, sendMessage, status, stop } = useChat();
 
   const categories = [
     'Restaurants',
@@ -124,6 +91,44 @@ const ChatComponent = () => {
                   case 'text':
                     return <div key={index}>{part.text}</div>;
                   default:
+                    if (typeof part.type === 'string' && part.type.startsWith('tool-')) {
+                      console.log('Tool Part:', part);
+                      const toolName = (part as any).toolName || part.type.slice('tool-'.length);
+                      const state = (part as any).state;
+                      if (state === 'input-available') {
+                        return (
+                          <div key={index} className="text-sm text-gray-200">
+                            Appel de l'outil {toolName} avec les arguments :{' '}
+                            <pre className="whitespace-pre-wrap break-all inline">
+                              {JSON.stringify((part as any).input, null, 2)}
+                            </pre>
+                          </div>
+                        );
+                      }
+                      if (state === 'output-available') {
+                        return (
+                          <div key={index} className="text-sm text-gray-200">
+                            Résultat de l'outil :{' '}
+                            <pre className="whitespace-pre-wrap break-all inline">
+                              {JSON.stringify((part as any).output, null, 2)}
+                            </pre>
+                          </div>
+                        );
+                      }
+                      if (state === 'output-error') {
+                        return (
+                          <div key={index} className="text-sm text-red-300">
+                            Erreur de l'outil : {(part as any).errorText}
+                          </div>
+                        );
+                      }
+                      // For other tool states like input-streaming, etc., show a compact placeholder
+                      return (
+                        <div key={index} className="text-sm text-gray-400">
+                          Outil {toolName} • état: {String(state)}
+                        </div>
+                      );
+                    }
                     return null;
                 }
               })}
