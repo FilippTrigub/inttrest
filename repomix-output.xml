@@ -32,7 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Files matching these patterns are excluded: **/*svg
+- Files matching these patterns are excluded: **/*.svg
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -42,53 +42,38 @@ The content is organized as follows:
 
 <directory_structure>
 .gitignore
+.qwen/settings.json
 frontend/.gitignore
+frontend/app/api/chat/route.ts
 frontend/app/globals.css
 frontend/app/layout.tsx
 frontend/app/page.tsx
+frontend/components/Chat.tsx
 frontend/components/Map.tsx
 frontend/next.config.ts
 frontend/package.json
-frontend/postcss.config.mjs
+frontend/postcss.config.js
 frontend/README.md
+frontend/tailwind.config.ts
 frontend/tsconfig.json
 LICENSE
+mcp_servers/unified_server.py
+requirements.txt
 </directory_structure>
 
 <files>
 This section contains the contents of the repository's files.
 
-<file path=".gitignore">
-# Node modules
-node_modules
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python/
-virtualenv/
-venv/
-env/
-
-# React build artifacts
-build/
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-
-# OS generated files
-.DS_Store
-thumbs.db
-prompt.xml
+<file path=".qwen/settings.json">
+{
+    "mcpServers": {
+      "context7": {
+        "command": "npx",
+        "args": ["-y", "@upstash/context7-mcp"]
+      }
+    },
+    "sessionTokenLimit": 128000
+  }
 </file>
 
 <file path="frontend/.gitignore">
@@ -136,9 +121,7 @@ next-env.d.ts
 </file>
 
 <file path="frontend/app/globals.css">
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 body {
   @apply bg-gray-900 text-white;
@@ -185,96 +168,28 @@ export default function RootLayout({
 
 <file path="frontend/app/page.tsx">
 import MapComponent from '@/components/Map';
+import ChatComponent from '@/components/Chat';
 
 export default function Home() {
   return (
     <div className="h-screen w-screen grid grid-cols-1 md:grid-cols-3">
-      <div className="md:col-span-1 bg-gray-800">
-        {/* Chatbot column */}
+      <div className="md:col-span-1 bg-gray-800 flex flex-col h-screen">
+        <ChatComponent />
       </div>
       <div className="md:col-span-2 bg-gray-700 h-full w-full">
-        <MapComponent accessToken={process.env.MAPBOX_ACCESS_TOKEN || ''} />
+        <MapComponent accessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ''} />
       </div>
     </div>
   );
 }
 </file>
 
-<file path="frontend/components/Map.tsx">
-'use client';
-
-import React, { useState } from 'react';
-import Map from 'react-map-gl';
-
-const MapComponent = ({ accessToken }: { accessToken: string }) => {
-  const [viewState, setViewState] = useState({
-    longitude: 2.3522,
-    latitude: 48.8566,
-    zoom: 10
-  });
-
-  return (
-    <Map
-      mapboxAccessToken={accessToken}
-      initialViewState={viewState}
-      style={{ width: '100%', height: '100%' }}
-      mapStyle="mapbox://styles/mapbox/streets-v11"
-      onMove={evt => setViewState(evt.viewState)}
-    />
-  );
-};
-
-export default MapComponent;
-</file>
-
-<file path="frontend/next.config.ts">
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
-</file>
-
-<file path="frontend/package.json">
-{
-  "name": "frontend",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
-    "start": "next start"
+<file path="frontend/postcss.config.js">
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
   },
-  "dependencies": {
-    "@ai-sdk/react": "^2.0.28",
-    "ai": "^5.0.28",
-    "clsx": "^2.1.1",
-    "mapbox-gl": "^3.14.0",
-    "next": "15.5.2",
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
-    "react-map-gl": "^8.0.4",
-    "tailwind-merge": "^3.3.1"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
-}
-</file>
-
-<file path="frontend/postcss.config.mjs">
-const config = {
-  plugins: ["@tailwindcss/postcss"],
 };
-
-export default config;
 </file>
 
 <file path="frontend/README.md">
@@ -314,6 +229,23 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="frontend/tailwind.config.ts">
+import type { Config } from 'tailwindcss';
+
+const config: Config = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+
+export default config;
 </file>
 
 <file path="frontend/tsconfig.json">
@@ -368,6 +300,475 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+</file>
+
+<file path="requirements.txt">
+# FastMCP - Framework MCP pour serveurs unifiés
+fastmcp==2.11.3
+
+# Dépendances optionnelles pour le développement
+pytest>=7.0
+black
+isort
+python-dotenv>=1.0
+</file>
+
+<file path=".gitignore">
+# Environment files
+.env
+.env.*
+!.env.example
+mcp_servers/.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+dist/
+build/
+.envrc
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local
+
+# OS
+.DS_Store
+Thumbs.db
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# Node modules (pour le frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+</file>
+
+<file path="frontend/components/Map.tsx">
+'use client';
+
+import React, { useState } from 'react';
+import Map, { Source } from 'react-map-gl';
+
+const MapComponent = ({ accessToken }: { accessToken: string }) => {
+  const [viewState, setViewState] = useState({
+    longitude: 2.3522,
+    latitude: 48.8566,
+    zoom: 15,
+    pitch: 60,
+    bearing: 0
+  });
+
+  return (
+    <Map
+      mapboxAccessToken={accessToken}
+      initialViewState={viewState}
+      style={{ width: '100%', height: '100%' }}
+      mapStyle="mapbox://styles/mapbox/standard"
+      antialias={true}
+      terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }}
+      onMove={evt => setViewState(evt.viewState)}
+    >
+      <Source
+        id="mapbox-dem"
+        type="raster-dem"
+        url="mapbox://mapbox.mapbox-terrain-dem-v1"
+        tileSize={512}
+        maxzoom={14}
+      />
+    </Map>
+  );
+};
+
+export default MapComponent;
+</file>
+
+<file path="frontend/next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  // Ensure Turbopack uses this folder as the project root
+  turbopack: {
+    root: ".",
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/mcp-server/:path*",
+        destination: "http://localhost:8000/:path*",
+      },
+    ];
+  },
+};
+
+export default nextConfig;
+</file>
+
+<file path="frontend/package.json">
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.23",
+    "@ai-sdk/react": "^2.0.28",
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "@vercel/mcp-adapter": "^1.0.0",
+    "ai": "^5.0.28",
+    "clsx": "^2.1.1",
+    "mapbox-gl": "^3.14.0",
+    "next": "15.5.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-map-gl": "^7.1.1",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="mcp_servers/unified_server.py">
+# unified_server.py
+import asyncio
+import os
+from dotenv import load_dotenv
+from fastmcp import FastMCP, Client
+# CHANGEMENT 1 : Importer le bon transport pour les connexions HTTP distantes
+from fastmcp.client.transports import StreamableHttpTransport
+
+load_dotenv()
+
+# --- 1. Configuration des clés d'API ---
+APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN")
+EXA_API_KEY = os.getenv("EXA_API_KEY")
+
+if not APIFY_API_TOKEN or not EXA_API_KEY:
+    raise ValueError(
+        "N'a pas pu trouver APIFY_API_TOKEN ou EXA_API_KEY. "
+        "Assurez-vous qu'elles sont définies dans votre fichier .env."
+    )
+
+# CHANGEMENT 2 : Placer toute la logique de configuration dans une fonction asynchrone
+async def main():
+    # --- 2. Création du serveur principal unifié ---
+    main_mcp = FastMCP(name="Serveur d'Outils Unifié")
+
+    # --- 3. Configuration des clients avec une connexion HTTP DIRECTE ---
+    # Client pour le scraper Lusha d'Apify
+    apify_lusha_client = Client(
+        transport=StreamableHttpTransport(
+            url="https://mcp.apify.com/?actors=lexis-solutions/lu-ma-scraper",
+            headers={"Authorization": f"Bearer {APIFY_API_TOKEN}"},
+        )
+    )
+
+    # Client pour le scraper Parsera d'Apify
+    apify_parsera_client = Client(
+        transport=StreamableHttpTransport(
+            url="https://mcp.apify.com/?actors=parsera-labs/parsera",
+            headers={"Authorization": f"Bearer {APIFY_API_TOKEN}"},
+        )
+    )
+
+    # Client pour Exa
+    exa_client = Client(
+        transport=StreamableHttpTransport(
+            url=f"https://mcp.exa.ai/mcp?exaApiKey={EXA_API_KEY}"
+        )
+    )
+
+    # --- 4. Création des serveurs proxy pour chaque client ---
+    apify_lusha_proxy = FastMCP.as_proxy(apify_lusha_client)
+    apify_parsera_proxy = FastMCP.as_proxy(apify_parsera_client)
+    exa_proxy = FastMCP.as_proxy(exa_client)
+
+    # --- 5. IMPORTATION (await) de chaque proxy sur le serveur principal ---
+    # On utilise import_server qui est asynchrone et fait une copie statique des outils.
+    # C'est plus simple et plus fiable que mount pour ce cas d'usage.
+    print("Importation des outils depuis les serveurs distants...")
+    await main_mcp.import_server(apify_lusha_proxy, prefix="apify_lusha")
+    await main_mcp.import_server(apify_parsera_proxy, prefix="apify_parsera")
+    await main_mcp.import_server(exa_proxy, prefix="exa")
+    print("Tous les outils ont été importés avec succès !")
+
+    # --- 6. Rendre le serveur principal exécutable en mode HTTP (de manière asynchrone) ---
+    print("Démarrage du Serveur d'Outils Unifié en mode HTTP...")
+    
+    # On utilise run_async car nous sommes dans une fonction asynchrone
+    await main_mcp.run_async(
+        transport="http",
+        host="0.0.0.0",
+        port=8000
+    )
+
+# CHANGEMENT 3 : Lancer la fonction asynchrone main
+if __name__ == "__main__":
+    asyncio.run(main())
+</file>
+
+<file path="frontend/components/Chat.tsx">
+'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import React, { useState } from 'react';
+
+const ChatComponent = () => {
+  const { messages, sendMessage, status, stop, addToolResult } = useChat({
+    onToolCall: async ({ toolCall }) => {
+      // Note: do not await addToolResult to avoid deadlocks
+      try {
+        // Ignore dynamic tools for type safety
+        if ((toolCall as any).dynamic) return;
+
+        const baseUrl = new URL(window.location.origin + '/api/mcp-server');
+        const transport = new StreamableHTTPClientTransport(baseUrl);
+        const client = new Client({ name: 'web-client', version: '1.0.0' });
+        await client.connect(transport);
+
+        const result = await client.callTool({ 
+          name: toolCall.toolName, 
+          arguments: toolCall.args 
+        });
+        
+        addToolResult({
+          tool: toolCall.toolName,
+          toolCallId: (toolCall as any).toolCallId,
+          output: result.content,
+        });
+      } catch (err) {
+        console.error('MCP tool call failed:', err);
+        addToolResult({
+          tool: toolCall.toolName,
+          toolCallId: (toolCall as any).toolCallId,
+          output: [{ type: 'text', text: 'Tool error: unable to execute MCP call.' }],
+        });
+      }
+    },
+  });
+
+  const categories = [
+    'Restaurants',
+    'Parcs',
+    'Musées',
+    'Cafés',
+    'Shopping',
+    'Hôtels',
+  ];
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [date, setDate] = useState<string>('');
+
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const [textInput, setTextInput] = useState<string>('');
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const trimmed = textInput.trim();
+    if (!trimmed) return;
+    sendMessage({ text: trimmed });
+    setTextInput('');
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-4 border-b border-gray-600">
+        <div className="mb-4">
+          <div className="text-sm text-gray-300 mb-2">Catégories</div>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => {
+              const isSelected = selectedCategories.includes(category);
+              return (
+                <button
+                  type="button"
+                  key={category}
+                  onClick={() => toggleCategory(category)}
+                  className={
+                    `px-3 py-1 rounded-full text-sm border transition-colors ` +
+                    (isSelected
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700')
+                  }
+                >
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div className="text-sm text-gray-300 mb-2">Date</div>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full p-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+      <div className="flex-grow overflow-y-auto p-4 space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`p-3 rounded-lg ${
+              message.role === 'user'
+                ? 'bg-blue-600 self-end'
+                : 'bg-gray-700 self-start'
+            }`}
+          >
+            <div className="font-semibold">
+              {message.role === 'user' ? 'You' : 'Assistant'}
+            </div>
+            <div className="mt-2">
+              {message.parts.map((part, index) => {
+                switch (part.type) {
+                  case 'text':
+                    return <div key={index}>{part.text}</div>;
+                  default:
+                    return null;
+                }
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <form onSubmit={onSubmit} className="p-4 border-t border-gray-600">
+        <input
+          type="text"
+          value={textInput}
+          onChange={(e) => setTextInput(e.target.value)}
+          className="w-full p-2 rounded-md bg-gray-800 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Type your message..."
+          disabled={status !== 'ready'}
+        />
+        <div className="mt-2 flex gap-2">
+          <button
+            type="submit"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-60"
+            disabled={status !== 'ready'}
+          >
+            Send
+          </button>
+          {(status === 'submitted' || status === 'streaming') && (
+            <button
+              type="button"
+              onClick={() => stop?.()}
+              className="px-4 py-2 rounded bg-gray-700 border border-gray-600 text-white"
+            >
+              Stop
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default ChatComponent;
+</file>
+
+<file path="frontend/app/api/chat/route.ts">
+import { streamText, convertToModelMessages, UIMessage } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
+
+export const maxDuration = 30;
+
+export async function POST(req: Request) {
+  try {
+    const { messages }: { messages: UIMessage[] } = await req.json();
+    
+    const result = await streamText({
+      model: openai('gpt-4.1'),
+      system: 'You are a helpful and friendly chatbot who assists users with their questions about maps and geography.',
+      messages: convertToModelMessages(messages),
+      tools: {},
+    });
+    
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    console.error('Error in chat API route:', error);
+    return new Response(
+      JSON.stringify({ error: 'An error occurred while processing your request' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+}
 </file>
 
 </files>
