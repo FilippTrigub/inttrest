@@ -1,10 +1,17 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import React, { useState } from 'react';
+import { DefaultChatTransport } from 'ai';
+import React, { useState, useEffect, useRef } from 'react';
 
-const ChatComponent = () => {
-  const { messages, sendMessage, status, stop } = useChat();
+interface ChatComponentProps {
+  onStreamingFinished?: () => void;
+}
+
+const ChatComponent = ({ onStreamingFinished }: ChatComponentProps) => {
+  const { messages, sendMessage, status, stop } = useChat({
+    transport: new DefaultChatTransport({ api: '/api/chat' }),
+  });
 
   const categories = [
     'Restaurants',
@@ -27,6 +34,15 @@ const ChatComponent = () => {
   };
 
   const [textInput, setTextInput] = useState<string>('');
+  const previousStatus = useRef(status);
+
+  // Monitor status changes to trigger callback when streaming finishes
+  useEffect(() => {
+    if (previousStatus.current === 'streaming' && status === 'ready') {
+      onStreamingFinished?.();
+    }
+    previousStatus.current = status;
+  }, [status, onStreamingFinished]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -90,6 +106,54 @@ const ChatComponent = () => {
                 switch (part.type) {
                   case 'text':
                     return <div key={index}>{part.text}</div>;
+                  case 'dynamic-tool': {
+                    const dt = part as any;
+                    const toolName = dt.toolName ?? 'outil';
+                    const state = dt.state;
+                    if (state === 'input-streaming' || state === 'input-available') {
+                      return (
+                        <div key={index} className="text-sm text-gray-200">
+                          Appel de l'outil {toolName} avec les arguments :{' '}
+                          <pre className="whitespace-pre-wrap break-all inline">
+                            {JSON.stringify(dt.input, null, 2)}
+                          </pre>
+                        </div>
+                      );
+                    }
+                    if (state === 'output-available') {
+                      return (
+                        <div key={index} className="text-sm text-gray-200">
+                          Résultat de l'outil {toolName} :{' '}
+                          <pre className="whitespace-pre-wrap break-all inline">
+                            {JSON.stringify(dt.output, null, 2)}
+                          </pre>
+                        </div>
+                      );
+                    }
+                    if (state === 'output-error') {
+                      return (
+                        <div key={index} className="text-sm text-red-300">
+                          Erreur de l'outil {toolName} : {dt.errorText}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={index} className="text-sm text-gray-400">
+                        Outil {toolName} • état: {String(state)}
+                      </div>
+                    );
+                  }
+                  case 'tool-invocation': {
+                    const ti = (part as any).toolInvocation ?? (part as any);
+                    return (
+                      <div key={index} className="text-sm text-gray-200">
+                        Invocation d'outil :{' '}
+                        <pre className="whitespace-pre-wrap break-all inline">
+                          {JSON.stringify(ti, null, 2)}
+                        </pre>
+                      </div>
+                    );
+                  }
                   default:
                     if (typeof part.type === 'string' && part.type.startsWith('tool-')) {
                       console.log('Tool Part:', part);

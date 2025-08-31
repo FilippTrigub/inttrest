@@ -1,6 +1,5 @@
 import { streamText, convertToModelMessages, UIMessage, experimental_createMCPClient, stepCountIs } from 'ai';
-import { openai } from '@ai-sdk/openai';
-import { z } from 'zod';
+import { createOpenAI } from '@ai-sdk/openai';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
 export const maxDuration = 30;
@@ -17,13 +16,27 @@ export async function POST(req: Request) {
     // Log discovered tools for verification
     console.log('MCP tools discovered:', Object.keys(tools));
 
+    const configuredOpenAI = createOpenAI({
+      // Allow switching to any OpenAI-compatible provider via env
+      // Common env names supported: OPENAI_BASE_URL, OPENAI_API_BASE, OPENAI_API_URL
+      baseURL:
+        process.env.OPENAI_BASE_URL ||
+        process.env.OPENAI_API_BASE ||
+        process.env.OPENAI_API_URL,
+      // If not provided, @ai-sdk/openai falls back to OPENAI_API_KEY
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+
+    const modelId = process.env.OPENAI_MODEL || 'gpt-4.1';
+
     const result = await streamText({
-      model: openai('gpt-4.1'),
+      model: configuredOpenAI(modelId),
       system: 'You are a helpful assistant for maps, geography, and information lookup. When relevant, proactively use the available tools to search, retrieve, or analyze data before answering. Prefer tool usage for up-to-date information, geographic data, or structured lookups.',
       messages: convertToModelMessages(messages),
       tools,
       toolChoice: 'required',
-      stopWhen: stepCountIs(5),
+      // Limit to a single tool-calling step
+      stopWhen: stepCountIs(1),
       onStepFinish: async ({ toolCalls, toolResults, text, finishReason, usage }) => {
         if (toolCalls?.length) {
           console.log('Tool calls:', JSON.stringify(toolCalls, null, 2));
