@@ -13,30 +13,25 @@ const ChatComponent = () => {
         // Ignore dynamic tools for type safety
         if ((toolCall as any).dynamic) return;
 
-        const baseUrl = new URL(window.location.origin + '/api/mcp');
+        const baseUrl = new URL(window.location.origin + '/api/mcp-server');
         const transport = new StreamableHTTPClientTransport(baseUrl);
         const client = new Client({ name: 'web-client', version: '1.0.0' });
         await client.connect(transport);
 
-        if (toolCall.toolName === 'search_places') {
-          const input: any = (toolCall as any).args ?? (toolCall as any).input ?? {};
-          const result = await client.callTool({
-            name: 'search_places',
-            arguments: {
-              category: input.category,
-              date: input.date,
-            },
-          });
-          addToolResult({
-            tool: 'search_places',
-            toolCallId: (toolCall as any).toolCallId,
-            output: result.content,
-          });
-        }
+        const result = await client.callTool({ 
+          name: toolCall.toolName, 
+          arguments: toolCall.args 
+        });
+        
+        addToolResult({
+          tool: toolCall.toolName,
+          toolCallId: (toolCall as any).toolCallId,
+          output: result.content,
+        });
       } catch (err) {
         console.error('MCP tool call failed:', err);
         addToolResult({
-          tool: 'search_places',
+          tool: toolCall.toolName,
           toolCallId: (toolCall as any).toolCallId,
           output: [{ type: 'text', text: 'Tool error: unable to execute MCP call.' }],
         });

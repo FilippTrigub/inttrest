@@ -9,19 +9,10 @@ export async function POST(req: Request) {
     const { messages }: { messages: UIMessage[] } = await req.json();
     
     const result = await streamText({
-      model: openai('gpt-4o'),
+      model: openai('gpt-4.1'),
       system: 'You are a helpful and friendly chatbot who assists users with their questions about maps and geography.',
       messages: convertToModelMessages(messages),
-      tools: {
-        search_places: {
-          description: 'Search points of interest by category and optional date',
-          parameters: z.object({
-            category: z.string(),
-            date: z.string().optional(),
-          }),
-          // No execute: handled client-side via MCP onToolCall
-        },
-      },
+      tools: {},
     });
     
     return result.toUIMessageStreamResponse();
