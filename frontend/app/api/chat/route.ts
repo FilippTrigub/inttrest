@@ -23,7 +23,8 @@ export async function POST(req: Request) {
       messages: convertToModelMessages(messages),
       tools,
       toolChoice: 'required',
-      stopWhen: stepCountIs(5),
+      // Limit to a single tool-calling step
+      stopWhen: stepCountIs(1),
       onStepFinish: async ({ toolCalls, toolResults, text, finishReason, usage }) => {
         if (toolCalls?.length) {
           console.log('Tool calls:', JSON.stringify(toolCalls, null, 2));
