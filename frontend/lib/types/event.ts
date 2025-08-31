@@ -19,7 +19,7 @@ export interface CreateEventInput {
     longitude: number;
     latitude: number;
   };
-  datetime: string | Date;
+  datetime: Date;
   title: string;
   [key: string]: any;
 }

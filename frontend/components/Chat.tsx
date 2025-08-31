@@ -1,9 +1,13 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-const ChatComponent = () => {
+interface ChatComponentProps {
+  onStreamingFinished?: () => void;
+}
+
+const ChatComponent = ({ onStreamingFinished }: ChatComponentProps) => {
   const { messages, sendMessage, status, stop } = useChat();
 
   const categories = [
@@ -27,6 +31,15 @@ const ChatComponent = () => {
   };
 
   const [textInput, setTextInput] = useState<string>('');
+  const previousStatus = useRef(status);
+
+  // Monitor status changes to trigger callback when streaming finishes
+  useEffect(() => {
+    if (previousStatus.current === 'streaming' && status === 'ready') {
+      onStreamingFinished?.();
+    }
+    previousStatus.current = status;
+  }, [status, onStreamingFinished]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
