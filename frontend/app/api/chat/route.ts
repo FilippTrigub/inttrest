@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     const { messages }: { messages: UIMessage[] } = await req.json();
     
     const result = await streamText({
-      model: openai('gpt-5'),
+      model: openai('gpt-4.1'),
       system: 'You are a helpful and friendly chatbot who assists users with their questions about maps and geography.',
       messages: convertToModelMessages(messages),
       tools: {},
