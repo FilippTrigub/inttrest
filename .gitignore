@@ -82,3 +82,14 @@ yarn-debug.log*
 yarn-error.log*
 prompt.xml
 repomix-output.xml
+
+
+# OS generated files
+.DS_Store
+thumbs.db
+prompt.xml
+
+# dev
+temp/*
+.idea
+.claude
