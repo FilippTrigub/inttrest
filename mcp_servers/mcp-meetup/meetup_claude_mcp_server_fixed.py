@@ -33,7 +33,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
 import aiohttp
-from anthropic import AsyncAnthropic
+# from anthropic import AsyncAnthropic
 from dateutil import parser as date_parser
 from mcp.server.fastmcp import FastMCP, Context
 from pydantic import BaseModel, Field
@@ -53,7 +53,7 @@ class Config:
     MEETUP_ACCESS_TOKEN = os.getenv('MEETUP_ACCESS_TOKEN', '')
     
     # Anthropic Configuration
-    ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
+    # ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY', '')
     
     # API Endpoints
     MEETUP_BASE_URL = 'https://api.meetup.com'
@@ -67,7 +67,7 @@ class Config:
     @classmethod
     def validate(cls) -> bool:
         """Validate that required configuration is present."""
-        required_fields = ['MEETUP_CLIENT_ID', 'MEETUP_CLIENT_SECRET', 'ANTHROPIC_API_KEY']
+        required_fields = ['MEETUP_CLIENT_ID', 'MEETUP_CLIENT_SECRET']
         missing = [field for field in required_fields if not getattr(cls, field)]
         if missing:
             logging.error(f"Missing required configuration: {', '.join(missing)}")
@@ -102,7 +102,7 @@ class MeetupEvent(BaseModel):
     group_url: str
     attendee_count: int = 0
     fee_amount: Optional[float] = None
-    fee_currency: Optional[str] = None
+    fee_currency: Optional[str] = "USD"
 
 
 # =============================================================================
@@ -115,14 +115,14 @@ class ServerState:
     def __init__(self):
         self.session: Optional[aiohttp.ClientSession] = None
         self.access_token: Optional[str] = Config.MEETUP_ACCESS_TOKEN
-        self.claude_client: Optional[AsyncAnthropic] = None
+        # self.claude_client: Optional[AsyncAnthropic] = None
         
     async def initialize(self):
         """Initialize global state."""
         self.session = aiohttp.ClientSession()
-        
-        if Config.ANTHROPIC_API_KEY:
-            self.claude_client = AsyncAnthropic(api_key=Config.ANTHROPIC_API_KEY)
+        #
+        # if Config.ANTHROPIC_API_KEY:
+        #     self.claude_client = AsyncAnthropic(api_key=Config.ANTHROPIC_API_KEY)
             
         if self.access_token:
             logging.info("Using existing Meetup access token")
@@ -410,7 +410,7 @@ async def search_meetup_events(
                 if event.attendee_count:
                     result += f"   Attendees: {event.attendee_count}\n"
                 
-                result += f"   Fee: {'Free' if not event.fee_amount else f'{event.fee_amount} {event.fee_currency or \"USD\"}'}\n"
+                result += f"   Fee: {'Free' if not event.fee_amount else f'{event.fee_amount} {event.fee_currency}'}\n"
                 result += f"   URL: {event.url}\n\n"
             
             return result
@@ -470,19 +470,19 @@ async def get_event_recommendations(
         augmented_prompt = await augment_prompt_with_events(full_prompt)
         
         # Get Claude's recommendations if available
-        if state.claude_client:
-            try:
-                message = await state.claude_client.messages.create(
-                    model="claude-3-sonnet-20240229",
-                    max_tokens=2000,
-                    messages=[{"role": "user", "content": augmented_prompt}]
-                )
-                return message.content[0].text
-            except Exception as e:
-                logging.error(f"Claude API error: {e}")
-                return f"Claude API unavailable. Here's the event data instead:\n\n{augmented_prompt}"
-        else:
-            return f"Claude integration not configured. Here's the event data:\n\n{augmented_prompt}"
+        # if state.claude_client:
+        #     try:
+        #         message = await state.claude_client.messages.create(
+        #             model="claude-3-sonnet-20240229",
+        #             max_tokens=2000,
+        #             messages=[{"role": "user", "content": augmented_prompt}]
+        #         )
+        #         return message.content[0].text
+        #     except Exception as e:
+        #         logging.error(f"Claude API error: {e}")
+        #         return f"Claude API unavailable. Here's the event data instead:\n\n{augmented_prompt}"
+        # else:
+        return f"Claude integration not configured. Here's the event data:\n\n{augmented_prompt}"
     
     except Exception as e:
         logging.error(f"Error getting recommendations: {e}")
@@ -523,7 +523,7 @@ def get_server_config() -> str:
     config_data = {
         "meetup_client_id": Config.MEETUP_CLIENT_ID[:8] + "..." if Config.MEETUP_CLIENT_ID else "Not set",
         "meetup_client_secret": "Set" if Config.MEETUP_CLIENT_SECRET else "Not set",
-        "anthropic_api_key": "Set" if Config.ANTHROPIC_API_KEY else "Not set",
+        # "anthropic_api_key": "Set" if Config.ANTHROPIC_API_KEY else "Not set",
         "max_events_per_query": Config.MAX_EVENTS_PER_QUERY,
         "default_radius": Config.DEFAULT_RADIUS,
         "log_level": Config.LOG_LEVEL
@@ -599,7 +599,7 @@ if __name__ == "__main__":
     MEETUP_CLIENT_ID=your_meetup_client_id
     MEETUP_CLIENT_SECRET=your_meetup_client_secret
     MEETUP_ACCESS_TOKEN=your_meetup_access_token (optional)
-    ANTHROPIC_API_KEY=your_anthropic_api_key
+    # ANTHROPIC_API_KEY=your_anthropic_api_key
     
     Usage:
     # Development with MCP CLI

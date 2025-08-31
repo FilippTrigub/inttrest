@@ -2,10 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/eventbrite-mcp" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/instagram-server-next-mcp" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/linkedin-mcp-server" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/luma-ai-mcp-server" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/mcp-meetup" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/temp/meetup_event_scraper" vcs="Git" />
   </component>
 </project>
