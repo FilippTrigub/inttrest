@@ -1,0 +1,8 @@
+# FastMCP - Framework MCP pour serveurs unifiés
+fastmcp==2.11.3
+
+# Dépendances optionnelles pour le développement
+pytest>=7.0
+black
+isort
+python-dotenv>=1.0
