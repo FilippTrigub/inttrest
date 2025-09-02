@@ -23,9 +23,9 @@ Inttrest is an interactive, interest-based location discovery application. It co
 The application follows a client-server architecture where the frontend communicates with a backend tool server via an API route. The AI model acts as a reasoning engine, deciding when to call external tools to fulfill a user's request.
 
 ```mermaid
-graph LR
+flowchart LR
     subgraph "User's Browser"
-        A[Next.js App<br/>(UI Component)]
+        A[Next.js App<br/>UI Component]
     end
 
     subgraph "Application Server (Next.js)"
@@ -33,19 +33,19 @@ graph LR
     end
 
     subgraph "Backend Tool Server"
-        C[Python MCP Server<br/>(unified_server.py)]
+        C[Python MCP Server<br/>unified_server.py]
     end
 
     subgraph "Third-Party Services"
-        D[External APIs<br/>(Exa, Apify, etc.)]
+        D[External APIs<br/>Exa, Apify, etc.]
     end
 
-    A -- "1. User sends prompt" --> B
-    B -- "2. Discovers tools & calls LLM" --> C
-    C -- "3. Proxies tool execution request" --> D
-    D -.->|"<br>4. Tool result"| C
-    C -.->|"<br>5. Result to LLM via API Route"| B
-    B -.->|"<br>6. Streams final AI response to UI"| A
+    A -- "(1) User sends prompt" --> B
+    B -- "(2) Discovers tools & calls LLM" --> C
+    C -- "(3) Proxies tool execution request" --> D
+    D -.->|"(4) Tool result"| C
+    C -.->|"(5) Result to LLM via API Route"| B
+    B -.->|"(6) Streams final AI response to UI"| A
 ```
 
 **Flow Explanation:**
@@ -172,3 +172,4 @@ Your application should now be running at [http://localhost:3000](http://localho
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
